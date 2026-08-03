@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Coverage gate](https://img.shields.io/badge/coverage-%E2%89%A580%25-brightgreen.svg)](pyproject.toml)
+[![QA](https://img.shields.io/badge/QA-live-success.svg)](https://cicd-demo-qa.onrender.com/health)
 
 Learn and showcase a production-style CI/CD pipeline: commit → lint → build → test → registry → QA → Staging → Production.
 
