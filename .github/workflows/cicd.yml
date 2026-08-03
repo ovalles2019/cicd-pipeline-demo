@@ -263,15 +263,19 @@ jobs:
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.release.outputs.image_tag }}
         run: |
           echo "Promoting $IMAGE → QA"
+          # Image-backed services: pass the GHCR ref so Render pulls the
+          # released tag (not a git source rebuild).
+          IMG_URL_ENC=$(python3 -c "import urllib.parse,os; print(urllib.parse.quote(os.environ['IMAGE'], safe=''))")
           if [ -n "$RENDER_DEPLOY_HOOK_QA" ]; then
-            curl -fsS -X POST "$RENDER_DEPLOY_HOOK_QA"
-            echo "QA deploy hook triggered."
+            SEP=$([[ "$RENDER_DEPLOY_HOOK_QA" == *\?* ]] && echo "&" || echo "?")
+            curl -fsS -X POST "${RENDER_DEPLOY_HOOK_QA}${SEP}imgURL=${IMG_URL_ENC}"
+            echo "QA deploy hook triggered for $IMAGE"
           elif [ -n "$RENDER_API_KEY" ] && [ -n "$RENDER_SERVICE_ID_QA" ]; then
             curl -fsS -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_QA}/deploys" \
               -H "Authorization: Bearer ${RENDER_API_KEY}" \
               -H "Content-Type: application/json" \
-              -d '{"clearCache":"do_not_clear"}'
-            echo "QA deploy triggered via Render API."
+              -d "{\"imageUrl\":\"${IMAGE}\"}"
+            echo "QA deploy triggered via Render API for $IMAGE"
           else
             echo "::notice::No Render credentials — simulating QA deploy for $IMAGE"
           fi
@@ -293,15 +297,17 @@ jobs:
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:qa
         run: |
           echo "Promoting $IMAGE → Staging"
+          IMG_URL_ENC=$(python3 -c "import urllib.parse,os; print(urllib.parse.quote(os.environ['IMAGE'], safe=''))")
           if [ -n "$RENDER_DEPLOY_HOOK_STAGING" ]; then
-            curl -fsS -X POST "$RENDER_DEPLOY_HOOK_STAGING"
-            echo "Staging deploy hook triggered."
+            SEP=$([[ "$RENDER_DEPLOY_HOOK_STAGING" == *\?* ]] && echo "&" || echo "?")
+            curl -fsS -X POST "${RENDER_DEPLOY_HOOK_STAGING}${SEP}imgURL=${IMG_URL_ENC}"
+            echo "Staging deploy hook triggered for $IMAGE"
           elif [ -n "$RENDER_API_KEY" ] && [ -n "$RENDER_SERVICE_ID_STAGING" ]; then
             curl -fsS -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_STAGING}/deploys" \
               -H "Authorization: Bearer ${RENDER_API_KEY}" \
               -H "Content-Type: application/json" \
-              -d '{"clearCache":"do_not_clear"}'
-            echo "Staging deploy triggered via Render API."
+              -d "{\"imageUrl\":\"${IMAGE}\"}"
+            echo "Staging deploy triggered via Render API for $IMAGE"
           else
             echo "::notice::No Render credentials — simulating Staging deploy for $IMAGE"
           fi
@@ -323,15 +329,17 @@ jobs:
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
         run: |
           echo "Promoting $IMAGE → Production"
+          IMG_URL_ENC=$(python3 -c "import urllib.parse,os; print(urllib.parse.quote(os.environ['IMAGE'], safe=''))")
           if [ -n "$RENDER_DEPLOY_HOOK_PRODUCTION" ]; then
-            curl -fsS -X POST "$RENDER_DEPLOY_HOOK_PRODUCTION"
-            echo "Production deploy hook triggered."
+            SEP=$([[ "$RENDER_DEPLOY_HOOK_PRODUCTION" == *\?* ]] && echo "&" || echo "?")
+            curl -fsS -X POST "${RENDER_DEPLOY_HOOK_PRODUCTION}${SEP}imgURL=${IMG_URL_ENC}"
+            echo "Production deploy hook triggered for $IMAGE"
           elif [ -n "$RENDER_API_KEY" ] && [ -n "$RENDER_SERVICE_ID_PRODUCTION" ]; then
             curl -fsS -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_PRODUCTION}/deploys" \
               -H "Authorization: Bearer ${RENDER_API_KEY}" \
               -H "Content-Type: application/json" \
-              -d '{"clearCache":"do_not_clear"}'
-            echo "Production deploy triggered via Render API."
+              -d "{\"imageUrl\":\"${IMAGE}\"}"
+            echo "Production deploy triggered via Render API for $IMAGE"
           else
             echo "::notice::No Render credentials — simulating Production deploy for $IMAGE"
           fi

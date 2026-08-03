@@ -67,14 +67,14 @@ tests/integration/    # Test-stage integration flows
 .pre-commit-config.yaml
 docs/                 # Branch protection + deploy wiring
 Dockerfile            # Container image (build + Trivy scan)
-render.yaml           # QA / Staging / Production on Render
+render.yaml           # QA / Staging / Production (GHCR image pulls)
 ```
 
 ## GitHub setup (show-ready)
 
 1. Branch protection on `main` — require the checks in [`docs/branch-protection.md`](docs/branch-protection.md).
 2. Environments `qa`, `staging`, `production` — reviewers on staging + production ([`docs/deploy.md`](docs/deploy.md)).
-3. Wire Render (Deploy Hooks or `RENDER_API_KEY` + service ID vars).
+3. Wire Render image-backed services (Deploy Hooks with `imgURL`, or `RENDER_API_KEY` + service ID vars) — see [`docs/deploy.md`](docs/deploy.md).
 
 Without Render credentials, deploy jobs still *simulate* promotion so the Actions graph stays learnable.
 

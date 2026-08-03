@@ -1,12 +1,13 @@
 # Build stage — install deps and keep the final image lean
-FROM python:3.12-slim AS builder
+# linux/amd64 required for Render image-backed services
+FROM --platform=linux/amd64 python:3.12-slim AS builder
 
 WORKDIR /build
 COPY requirements.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 # Runtime image
-FROM python:3.12-slim
+FROM --platform=linux/amd64 python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
