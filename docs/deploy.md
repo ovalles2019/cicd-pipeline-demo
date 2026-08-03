@@ -1,8 +1,8 @@
-# Wiring real deploys (optional — pipeline works without this)
+# Wiring real deploys
 
-The GitHub Actions workflow always builds, tests, and (on `main`) pushes
-an image to **GHCR**. Deploy jobs call Render Deploy Hooks when secrets exist;
-otherwise they print a simulated promotion so you can learn the flow first.
+The GitHub Actions workflow always builds, tests, scans, and (on `main`) pushes
+an image to **GHCR**. Deploy jobs promote through GitHub Environments and
+redeploy the matching Render service.
 
 ## 1. Create GitHub Environments
 
@@ -16,17 +16,31 @@ Repo → **Settings → Environments** → create:
 
 Optional environment variables (shown as the job URL in Actions):
 
-- `QA_URL` → `https://cicd-demo-qa.onrender.com`
-- `STAGING_URL` → `https://cicd-demo-staging.onrender.com`
-- `PRODUCTION_URL` → `https://cicd-demo-production.onrender.com`
+- `QA_URL`
+- `STAGING_URL`
+- `PRODUCTION_URL`
 
-## 2. Deploy the Render Blueprint
+## 2. Deploy the Render Blueprint (or create via API)
 
-1. Push this repo to GitHub.
-2. In [Render](https://dashboard.render.com): **New → Blueprint** → select the repo.
+**Option A — Blueprint**
+
+1. Merge to `main`.
+2. In [Render](https://dashboard.render.com): **New → Blueprint** → select this repo.
 3. Confirm the three services from `render.yaml`.
 
-## 3. Add Deploy Hook secrets
+**Option B — already created**
+
+Service IDs are stored as repository variables:
+
+| Variable | Service |
+|----------|---------|
+| `RENDER_SERVICE_ID_QA` | cicd-demo-qa |
+| `RENDER_SERVICE_ID_STAGING` | cicd-demo-staging |
+| `RENDER_SERVICE_ID_PRODUCTION` | cicd-demo-production |
+
+## 3. Authenticate deploys (pick one)
+
+### Deploy Hooks (simplest)
 
 For each Render service: **Settings → Deploy Hook → Copy**.
 
@@ -38,16 +52,17 @@ GitHub → **Settings → Secrets and variables → Actions**:
 | `RENDER_DEPLOY_HOOK_STAGING` | cicd-demo-staging |
 | `RENDER_DEPLOY_HOOK_PRODUCTION` | cicd-demo-production |
 
-## 4. GHCR visibility
+### Render API key (alternative)
 
-Images land at `ghcr.io/<owner>/cicd-pipeline-demo`.
+1. Create an API key in Render → Account Settings → API Keys.
+2. Add repo secret `RENDER_API_KEY`.
+3. Ensure the three `RENDER_SERVICE_ID_*` repository variables are set.
 
-If Render pulls from GHCR and the package is private, create a
-[Render registry credential](https://render.com/docs/deploying-an-image#credentials)
-with a GitHub PAT that has `read:packages`.
+Deploy jobs try Deploy Hook first, then fall back to the API.
 
-For a public demo, set the package to **Public** under
-GitHub → Packages → package settings.
+## 4. GHCR
+
+Images land at `ghcr.io/<owner>/cicd-pipeline-demo` (`:sha`, `:qa`, `:latest`).
 
 ## 5. Promotion path
 
@@ -59,5 +74,5 @@ main merge
   → deploy-production (waits for your approval)
 ```
 
-Each deploy job hits the matching Render hook, which rebuilds/redeploys
-that environment's service from this repo's Dockerfile.
+Without Render credentials, deploy jobs still succeed and *simulate* promotion
+so you can learn the Actions graph first.

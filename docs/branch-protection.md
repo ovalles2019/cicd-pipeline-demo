@@ -7,8 +7,9 @@
 #       - lint
 #       - unit-tests
 #       - coverage
-#       - integration-tests
 #       - build-image
+#       - security-scan
+#       - integration-tests
 #   ✓ Require branches to be up to date before merging
 #   ✓ Do not allow bypassing the above settings
 #   ✓ Restrict who can push to matching branches (optional)
