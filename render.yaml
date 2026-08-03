@@ -1,0 +1,61 @@
+# Render Blueprint — QA / Staging / Production (Python runtime).
+# Deployments are triggered by GitHub Actions (autoDeploy off per service
+# when created via API, or use Deploy Hooks — see docs/deploy.md).
+# Free services spin down after ~15 min idle.
+#
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: cicd-demo-qa
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    autoDeploy: false
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: qa
+      - key: APP_NAME
+        value: cicd-pipeline-demo
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+
+  - type: web
+    name: cicd-demo-staging
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    autoDeploy: false
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: staging
+      - key: APP_NAME
+        value: cicd-pipeline-demo
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+
+  - type: web
+    name: cicd-demo-production
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    autoDeploy: false
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_NAME
+        value: cicd-pipeline-demo
+      - key: PYTHON_VERSION
+        value: "3.12.8"
