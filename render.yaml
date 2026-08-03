@@ -1,0 +1,46 @@
+# Render Blueprint — three environments matching the pipeline diagram.
+# Free web services spin down after ~15 min idle; that's fine for a demo.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# After connecting this repo in the Render Dashboard (New → Blueprint),
+# copy each service's Deploy Hook URL into GitHub Actions secrets:
+#   RENDER_DEPLOY_HOOK_QA
+#   RENDER_DEPLOY_HOOK_STAGING
+#   RENDER_DEPLOY_HOOK_PRODUCTION
+
+services:
+  - type: web
+    name: cicd-demo-qa
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: qa
+      - key: APP_NAME
+        value: cicd-pipeline-demo
+
+  - type: web
+    name: cicd-demo-staging
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: staging
+      - key: APP_NAME
+        value: cicd-pipeline-demo
+
+  - type: web
+    name: cicd-demo-production
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_NAME
+        value: cicd-pipeline-demo
